@@ -9,6 +9,9 @@ import java.io.Reader;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class BomSkipper {
+
+    private static final char[] UTF_8_BOM = {0xEF, 0xBB, 0xBF};
+
     public static void skip(@NonNull Reader reader) throws IOException {
         reader.mark(1);
         char[] possibleBOM = new char[1];

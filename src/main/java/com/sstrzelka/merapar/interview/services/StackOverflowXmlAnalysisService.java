@@ -2,6 +2,7 @@ package com.sstrzelka.merapar.interview.services;
 
 import com.sstrzelka.merapar.interview.exceptions.InvalidUrlException;
 import com.sstrzelka.merapar.interview.exceptions.InvalidXmlException;
+import com.sstrzelka.merapar.interview.model.StackOverflowProcessingData;
 import com.sstrzelka.merapar.interview.model.StackOverflowRow;
 import com.sstrzelka.merapar.interview.model.requests.XmlAnalysisRequest;
 import com.sstrzelka.merapar.interview.model.responses.StackOverflowSummary;
@@ -20,10 +21,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.OptionalDouble;
 
 @Service
 @RequiredArgsConstructor
@@ -38,14 +35,13 @@ public class StackOverflowXmlAnalysisService implements XmlAnalysisService {
 
     @Override
     public XmlAnalysisResponse parse(XmlAnalysisRequest request) throws InvalidUrlException, InvalidXmlException {
-//        TODO storing all elements seems like an overkill, just calculate necessary data
-        List<StackOverflowRow> rows = new ArrayList<>();
+        StackOverflowProcessingData finalState;
         try {
             final URL url = new URL(request.getUrl());
             try (var bufferedReader = new BufferedReader(new InputStreamReader(url.openStream()))) {
                 BomSkipper.skip(bufferedReader);
                 final XMLEventReader reader = factory.createXMLEventReader(bufferedReader);
-                parseStream(rows, reader);
+                finalState = parseStream(reader);
             }
         } catch (MalformedURLException e) {
             log.error(e.getMessage());
@@ -54,37 +50,37 @@ public class StackOverflowXmlAnalysisService implements XmlAnalysisService {
             log.error(e.getMessage());
             throw new InvalidXmlException();
         }
-        rows.sort(Comparator.comparing(StackOverflowRow::getCreationDate));
         var summary = StackOverflowSummary.builder()
-                .firstPost(rows.get(0).getCreationDate())
-                .lastPost(rows.get(rows.size() - 1).getCreationDate())
-                .avgScore(getAvgScore(rows).orElse(-1))
-                .totalAcceptedPosts(getAcceptedAnserwsCount(rows))
-                .totalPosts(rows.size())
+                .firstPost(finalState.getYoungestRow())
+                .lastPost(finalState.getOldestRow())
+                .avgScore(calculateAvgScore(finalState))
+                .totalAcceptedPosts(finalState.getAcceptedAnswerCount())
+                .totalPosts(finalState.getCount())
                 .build();
         return new XmlAnalysisResponse(summary);
     }
 
-    private void parseStream(List<StackOverflowRow> rows, XMLEventReader reader) throws XMLStreamException {
+    private double calculateAvgScore(StackOverflowProcessingData finalState) {
+        if (finalState.getCount() != 0)
+            return (double) finalState.getOverallScore() / finalState.getCount();
+        return 0;
+    }
+
+    private StackOverflowProcessingData parseStream(XMLEventReader reader) throws XMLStreamException {
+        var currentState = new StackOverflowProcessingData();
         while (reader.hasNext()) {
             final XMLEvent event = reader.nextEvent();
             if (isEventARow(event)) {
-                rows.add(stackOverflowParser.parseRow(event.asStartElement()));
+                StackOverflowRow row = stackOverflowParser.parseRow(event.asStartElement());
+                currentState.updateData(row);
             }
         }
+        return currentState;
     }
 
     private boolean isEventARow(XMLEvent event) {
         return event.isStartElement() && event.asStartElement().getName()
                 .getLocalPart().equals(ROW_FIELD);
-    }
-
-    private long getAcceptedAnserwsCount(List<StackOverflowRow> rows) {
-        return rows.stream().filter(StackOverflowRow::isAccepted).count();
-    }
-
-    private OptionalDouble getAvgScore(List<StackOverflowRow> rows) {
-        return rows.stream().mapToInt(StackOverflowRow::getScore).average();
     }
 }
 

@@ -22,7 +22,8 @@ public class XmlAnalysisController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public XmlAnalysisResponse analyzeStackOverflowXml(@RequestBody XmlAnalysisRequest request) throws InvalidUrlException, InvalidXmlException {
+    public XmlAnalysisResponse analyzeStackOverflowXml(@RequestBody XmlAnalysisRequest request)
+            throws InvalidUrlException, InvalidXmlException {
         return xmlAnalysisServiceService.parse(request);
     }
 }
