@@ -24,4 +24,12 @@ public class StackOverflowProcessingData {
                 oldestRow = row.getCreationDate();
         }
     }
+
+    public LocalDateTime getYoungestRow() {
+        return youngestRow != LocalDateTime.MAX ? youngestRow : null;
+    }
+
+    public LocalDateTime getOldestRow() {
+        return oldestRow != LocalDateTime.MIN ? oldestRow : null;
+    }
 }

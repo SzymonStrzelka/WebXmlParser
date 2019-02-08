@@ -1,5 +1,6 @@
 package com.sstrzelka.merapar.interview.services;
 
+import com.sstrzelka.merapar.interview.exceptions.HostUnreachableException;
 import com.sstrzelka.merapar.interview.exceptions.InvalidUrlException;
 import com.sstrzelka.merapar.interview.exceptions.InvalidXmlException;
 import com.sstrzelka.merapar.interview.model.StackOverflowProcessingData;
@@ -34,7 +35,7 @@ public class StackOverflowXmlAnalysisService implements XmlAnalysisService {
     private final StackOverflowParser stackOverflowParser;
 
     @Override
-    public XmlAnalysisResponse parse(XmlAnalysisRequest request) throws InvalidUrlException, InvalidXmlException {
+    public XmlAnalysisResponse parse(XmlAnalysisRequest request) throws InvalidUrlException, InvalidXmlException, HostUnreachableException {
         StackOverflowProcessingData finalState;
         try {
             final URL url = new URL(request.getUrl());
@@ -46,9 +47,11 @@ public class StackOverflowXmlAnalysisService implements XmlAnalysisService {
         } catch (MalformedURLException e) {
             log.error(e.getMessage());
             throw new InvalidUrlException();
-        } catch (XMLStreamException | IOException e) {
+        } catch (XMLStreamException e) {
             log.error(e.getMessage());
             throw new InvalidXmlException();
+        } catch (IOException e) {
+            throw new HostUnreachableException();
         }
         var summary = StackOverflowSummary.builder()
                 .firstPost(finalState.getYoungestRow())

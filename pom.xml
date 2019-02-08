@@ -39,7 +39,13 @@
             <artifactId>lombok</artifactId>
             <version>1.18.4</version>
         </dependency>
-    </dependencies>
+		<dependency>
+			<groupId>org.mock-server</groupId>
+			<artifactId>mockserver-netty</artifactId>
+			<version>5.5.1</version>
+		</dependency>
+
+	</dependencies>
 
 	<build>
 		<plugins>
@@ -54,6 +60,32 @@
 					<source>11</source>
 					<target>11</target>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.mock-server</groupId>
+				<artifactId>mockserver-maven-plugin</artifactId>
+				<version>5.5.1</version>
+				<configuration>
+					<serverPort>1080</serverPort>
+					<logLevel>DEBUG</logLevel>
+					<initializationClass>org.mockserver.maven.ExampleInitializationClass</initializationClass>
+				</configuration>
+				<executions>
+					<execution>
+						<id>process-test-classes</id>
+						<phase>process-test-classes</phase>
+						<goals>
+							<goal>start</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>verify</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>stop</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>

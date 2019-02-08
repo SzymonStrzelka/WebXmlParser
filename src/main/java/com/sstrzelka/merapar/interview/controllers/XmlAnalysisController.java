@@ -1,5 +1,6 @@
 package com.sstrzelka.merapar.interview.controllers;
 
+import com.sstrzelka.merapar.interview.exceptions.HostUnreachableException;
 import com.sstrzelka.merapar.interview.exceptions.InvalidUrlException;
 import com.sstrzelka.merapar.interview.exceptions.InvalidXmlException;
 import com.sstrzelka.merapar.interview.model.requests.XmlAnalysisRequest;
@@ -10,6 +11,8 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.validation.Valid;
 
 @RestController
 @RequiredArgsConstructor
@@ -22,8 +25,8 @@ public class XmlAnalysisController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public XmlAnalysisResponse analyzeStackOverflowXml(@RequestBody XmlAnalysisRequest request)
-            throws InvalidUrlException, InvalidXmlException {
+    public XmlAnalysisResponse analyzeStackOverflowXml(@RequestBody @Valid XmlAnalysisRequest request)
+            throws InvalidUrlException, InvalidXmlException, HostUnreachableException {
         return xmlAnalysisServiceService.parse(request);
     }
 }

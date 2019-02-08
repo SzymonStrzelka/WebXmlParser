@@ -4,15 +4,15 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.Reader;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class BomSkipper {
 
     private static final char[] UTF_8_BOM = {0xEF, 0xBB, 0xBF};
 
-    public static void skip(@NonNull Reader reader) throws IOException {
+    public static void skip(@NonNull BufferedReader reader) throws IOException {
         reader.mark(1);
         char[] possibleBOM = new char[1];
         reader.read(possibleBOM);
