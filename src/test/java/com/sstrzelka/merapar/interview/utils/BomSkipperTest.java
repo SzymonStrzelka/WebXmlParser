@@ -19,10 +19,33 @@ public class BomSkipperTest {
 
     @Test
     public void testSkipUTF8() throws Exception {
+        reader = new BufferedReader(new CharArrayReader(UTF_8_BOM.toCharArray()));
+        BomSkipper.skip(reader);
+        reader.read(actual);
+        Assert.assertFalse(Arrays.equals(actual, UTF_8_BOM.toCharArray()));
+    }
+
+    @Test
+    public void testSkipUTF16LE() throws Exception {
         reader = new BufferedReader(new CharArrayReader(UTF_16_LE_BOM.toCharArray()));
         BomSkipper.skip(reader);
         reader.read(actual);
         Assert.assertFalse(Arrays.equals(actual, UTF_16_LE_BOM.toCharArray()));
     }
 
+    @Test
+    public void testSkipUTF16BE() throws Exception {
+        reader = new BufferedReader(new CharArrayReader(UTF_16_BE_BOM.toCharArray()));
+        BomSkipper.skip(reader);
+        reader.read(actual);
+        Assert.assertFalse(Arrays.equals(actual, UTF_16_BE_BOM.toCharArray()));
+    }
+
+    @Test
+    public void testSkipUTF32() throws Exception {
+        reader = new BufferedReader(new CharArrayReader(UTF_32_BOM.toCharArray()));
+        BomSkipper.skip(reader);
+        reader.read(actual);
+        Assert.assertFalse(Arrays.equals(actual, UTF_32_BOM.toCharArray()));
+    }
 }

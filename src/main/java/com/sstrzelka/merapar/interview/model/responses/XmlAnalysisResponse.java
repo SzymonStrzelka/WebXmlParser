@@ -7,5 +7,5 @@ import java.time.LocalDateTime;
 @Value
 public class XmlAnalysisResponse {
     private final LocalDateTime analyseDate = LocalDateTime.now();
-    private final StackOverflowSummary details;
+    private final StackOverflowAnalysisSummary details;
 }

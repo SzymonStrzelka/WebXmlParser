@@ -1,12 +1,9 @@
 package com.sstrzelka.merapar.interview.services;
 
-import com.sstrzelka.merapar.interview.exceptions.HostUnreachableException;
-import com.sstrzelka.merapar.interview.exceptions.InvalidUrlException;
 import com.sstrzelka.merapar.interview.exceptions.InvalidXmlException;
 import com.sstrzelka.merapar.interview.model.StackOverflowProcessingData;
 import com.sstrzelka.merapar.interview.model.StackOverflowRow;
-import com.sstrzelka.merapar.interview.model.requests.XmlAnalysisRequest;
-import com.sstrzelka.merapar.interview.model.responses.StackOverflowSummary;
+import com.sstrzelka.merapar.interview.model.responses.StackOverflowAnalysisSummary;
 import com.sstrzelka.merapar.interview.model.responses.XmlAnalysisResponse;
 import com.sstrzelka.merapar.interview.utils.BomSkipper;
 import lombok.RequiredArgsConstructor;
@@ -19,14 +16,12 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.XMLEvent;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
-import java.net.URL;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
-//TODO check multithreading behaviour
 public class StackOverflowXmlAnalysisService implements XmlAnalysisService {
 
     private static final String ROW_FIELD = "row";
@@ -35,25 +30,19 @@ public class StackOverflowXmlAnalysisService implements XmlAnalysisService {
     private final StackOverflowParser stackOverflowParser;
 
     @Override
-    public XmlAnalysisResponse parse(XmlAnalysisRequest request) throws InvalidUrlException, InvalidXmlException, HostUnreachableException {
+    public XmlAnalysisResponse parse(InputStream inputStream) throws InvalidXmlException {
         StackOverflowProcessingData finalState;
         try {
-            final URL url = new URL(request.getUrl());
-            try (var bufferedReader = new BufferedReader(new InputStreamReader(url.openStream()))) {
+            try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
                 BomSkipper.skip(bufferedReader);
                 final XMLEventReader reader = factory.createXMLEventReader(bufferedReader);
                 finalState = parseStream(reader);
             }
-        } catch (MalformedURLException e) {
-            log.error(e.getMessage());
-            throw new InvalidUrlException();
-        } catch (XMLStreamException e) {
+        } catch (XMLStreamException | IOException e) {
             log.error(e.getMessage());
             throw new InvalidXmlException();
-        } catch (IOException e) {
-            throw new HostUnreachableException();
         }
-        var summary = StackOverflowSummary.builder()
+        StackOverflowAnalysisSummary summary = StackOverflowAnalysisSummary.builder()
                 .firstPost(finalState.getYoungestRow())
                 .lastPost(finalState.getOldestRow())
                 .avgScore(calculateAvgScore(finalState))
@@ -70,11 +59,11 @@ public class StackOverflowXmlAnalysisService implements XmlAnalysisService {
     }
 
     private StackOverflowProcessingData parseStream(XMLEventReader reader) throws XMLStreamException {
-        var currentState = new StackOverflowProcessingData();
+        final StackOverflowProcessingData currentState = new StackOverflowProcessingData();
         while (reader.hasNext()) {
             final XMLEvent event = reader.nextEvent();
             if (isEventARow(event)) {
-                StackOverflowRow row = stackOverflowParser.parseRow(event.asStartElement());
+                final StackOverflowRow row = stackOverflowParser.parseRow(event.asStartElement());
                 currentState.updateData(row);
             }
         }

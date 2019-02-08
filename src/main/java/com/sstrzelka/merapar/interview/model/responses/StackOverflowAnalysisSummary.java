@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Value
 @Builder
 //FIXME this class should inherit from XMLAnalysisResponse
-public class StackOverflowSummary {
+public class StackOverflowAnalysisSummary {
 
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     @JsonSerialize(using = LocalDateTimeSerializer.class)
