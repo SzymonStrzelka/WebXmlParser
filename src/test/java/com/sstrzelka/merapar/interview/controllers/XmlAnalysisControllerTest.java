@@ -2,7 +2,7 @@ package com.sstrzelka.merapar.interview.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sstrzelka.merapar.interview.model.requests.XmlAnalysisRequest;
-import com.sstrzelka.merapar.interview.model.responses.StackOverflowAnalysisSummary;
+import com.sstrzelka.merapar.interview.model.responses.StackOverflowAnalysisDetails;
 import com.sstrzelka.merapar.interview.services.StackOverflowParser;
 import com.sstrzelka.merapar.interview.services.StackOverflowXmlAnalysisService;
 import com.sstrzelka.merapar.interview.services.XmlAnalysisService;
@@ -38,8 +38,8 @@ public class XmlAnalysisControllerTest {
     private static final String INVALID_XML = "<tag1><tag2></tag1>";
     private static final String NO_ROWS_XML = "<tag></tag>";
 
-    private static StackOverflowAnalysisSummary VALID_RESPONSE;
-    private static StackOverflowAnalysisSummary VALID_RESPONSE_EMPTY_XML;
+    private static StackOverflowAnalysisDetails VALID_RESPONSE;
+    private static StackOverflowAnalysisDetails VALID_RESPONSE_EMPTY_XML;
     private static ClientAndServer mockServer = startClientAndServer(PORT);
 
     private XmlAnalysisService analysisService = new StackOverflowXmlAnalysisService(new StackOverflowParser());
@@ -48,14 +48,14 @@ public class XmlAnalysisControllerTest {
 
     @Before
     public void setUp() throws Exception {
-        VALID_RESPONSE = StackOverflowAnalysisSummary.builder()
+        VALID_RESPONSE = StackOverflowAnalysisDetails.builder()
                 .firstPost(LocalDateTime.parse("2015-07-14T18:39:27.757"))
                 .lastPost(LocalDateTime.parse("2015-07-14T18:39:27.757"))
                 .totalPosts(1)
                 .avgScore(4.0)
                 .totalAcceptedPosts(1)
                 .build();
-        VALID_RESPONSE_EMPTY_XML = StackOverflowAnalysisSummary.builder()
+        VALID_RESPONSE_EMPTY_XML = StackOverflowAnalysisDetails.builder()
                 .totalPosts(0)
                 .avgScore(0)
                 .totalAcceptedPosts(0)
@@ -110,7 +110,7 @@ public class XmlAnalysisControllerTest {
                                 .withBody(xml)
                 );
     }
-    private void performPositiveScenario(String endpoint, StackOverflowAnalysisSummary response) throws Exception {
+    private void performPositiveScenario(String endpoint, StackOverflowAnalysisDetails response) throws Exception {
         XmlAnalysisRequest request = prepareRequest(endpoint);
         mockMvc.perform(post("/analyze")
                 .content(objectMapper.writeValueAsString(request))

@@ -1,11 +1,10 @@
 package com.sstrzelka.merapar.interview.model.responses;
 
-import lombok.Value;
+import lombok.Data;
 
 import java.time.LocalDateTime;
 
-@Value
+@Data
 public class XmlAnalysisResponse {
     private final LocalDateTime analyseDate = LocalDateTime.now();
-    private final StackOverflowAnalysisSummary details;
 }

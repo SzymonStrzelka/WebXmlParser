@@ -3,7 +3,8 @@ package com.sstrzelka.merapar.interview.services;
 import com.sstrzelka.merapar.interview.exceptions.InvalidXmlException;
 import com.sstrzelka.merapar.interview.model.StackOverflowProcessingData;
 import com.sstrzelka.merapar.interview.model.StackOverflowRow;
-import com.sstrzelka.merapar.interview.model.responses.StackOverflowAnalysisSummary;
+import com.sstrzelka.merapar.interview.model.responses.StackOverflowAnalysisDetails;
+import com.sstrzelka.merapar.interview.model.responses.StackOverflowXmlAnalysisResponse;
 import com.sstrzelka.merapar.interview.model.responses.XmlAnalysisResponse;
 import com.sstrzelka.merapar.interview.utils.BomSkipper;
 import lombok.RequiredArgsConstructor;
@@ -42,14 +43,14 @@ public class StackOverflowXmlAnalysisService implements XmlAnalysisService {
             log.error(e.getMessage());
             throw new InvalidXmlException();
         }
-        StackOverflowAnalysisSummary summary = StackOverflowAnalysisSummary.builder()
+        StackOverflowAnalysisDetails summary = StackOverflowAnalysisDetails.builder()
                 .firstPost(finalState.getYoungestRow())
                 .lastPost(finalState.getOldestRow())
                 .avgScore(calculateAvgScore(finalState))
                 .totalAcceptedPosts(finalState.getAcceptedAnswerCount())
                 .totalPosts(finalState.getCount())
                 .build();
-        return new XmlAnalysisResponse(summary);
+        return new StackOverflowXmlAnalysisResponse(summary);
     }
 
     private double calculateAvgScore(StackOverflowProcessingData finalState) {

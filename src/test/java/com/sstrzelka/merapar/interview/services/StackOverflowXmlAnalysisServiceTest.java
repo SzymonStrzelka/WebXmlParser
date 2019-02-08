@@ -2,7 +2,7 @@ package com.sstrzelka.merapar.interview.services;
 
 import com.sstrzelka.merapar.interview.exceptions.InvalidXmlException;
 import com.sstrzelka.merapar.interview.model.StackOverflowRow;
-import com.sstrzelka.merapar.interview.model.responses.XmlAnalysisResponse;
+import com.sstrzelka.merapar.interview.model.responses.StackOverflowXmlAnalysisResponse;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -40,7 +40,7 @@ public class StackOverflowXmlAnalysisServiceTest {
 
     @Test
     public void testParseValidStreamShouldReturnValidResponse() throws Exception {
-        XmlAnalysisResponse response = service.parse(new ByteArrayInputStream(VALID_XML));
+        StackOverflowXmlAnalysisResponse response = (StackOverflowXmlAnalysisResponse) service.parse(new ByteArrayInputStream(VALID_XML));
 
         assertEquals(SCORE, response.getDetails().getAvgScore(), 0.1);
         assertEquals(0, response.getDetails().getTotalAcceptedPosts());
@@ -57,7 +57,7 @@ public class StackOverflowXmlAnalysisServiceTest {
                 .build();
         Mockito.when(stackOverflowParser.parseRow(any())).thenReturn(row);
 
-        XmlAnalysisResponse response = service.parse(new ByteArrayInputStream(VALID_XML));
+        StackOverflowXmlAnalysisResponse response = (StackOverflowXmlAnalysisResponse) service.parse(new ByteArrayInputStream(VALID_XML));
 
         assertEquals(0, response.getDetails().getAvgScore(), 0.1);
         assertEquals(0, response.getDetails().getTotalAcceptedPosts());
